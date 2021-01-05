@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "allowJs": true,
+        "target": "es2015",
+        "noErrorTruncation":true,
+        "strictNullChecks": true
+    }
+}
