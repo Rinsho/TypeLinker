@@ -1,5 +1,5 @@
 
-import type { Link, KeysOf, ValuesFor, Variance, O2N, M2N } from './TypeLinker';
+import type { Link, KeysOf, ValuesFor, Variance, O2N, M2N } from '../core/TypeLinker';
 //
 // TESTS
 //
