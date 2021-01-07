@@ -1,9 +1,11 @@
 {
     "compilerOptions": {
+        "keyofStringsOnly": true,
+        "strictFunctionTypes": true,
         "noImplicitAny": true,
+        "strictNullChecks": true,
         "allowJs": true,
         "target": "es2015",
-        "noErrorTruncation":true,
-        "strictNullChecks": true
+        "noErrorTruncation":true 
     }
 }

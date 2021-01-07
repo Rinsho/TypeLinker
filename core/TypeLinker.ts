@@ -1,7 +1,7 @@
 //Type map generators
 export type M2N<TypeSet1, TypeSet2> = 
     M2N_Helper<ToUnion<TypeSet1>, ToUnion<TypeSet2>>;
-export type O2N<TypeSet1, TypeSet2> = Link<TypeSet1, TypeSet2>;
+export type O2N<TypeSet1, TypeSet2> = Link<TypeSet1, Flatten<TypeSet2>>;
 
 //Core
 export type Link<Key, Value> = [Key, Value] & LinkBase;
@@ -45,6 +45,11 @@ type ValuesFor_Invariant<LinkSet, Key extends KeysOf<LinkSet>> =
                 : never
             : never
         : never;
+
+//Slower but works for contravariant function configs
+type ValuesFor_Bivariant_strictFuncTypes<LinkSet, Key extends KeysOf<LinkSet>> =
+    ValuesFor_Covariant<LinkSet, Key> | ValuesFor_Contravariant<LinkSet, Key>;
+
 type ValuesFor_Bivariant<LinkSet, Key extends KeysOf<LinkSet>> =
     Key extends any ?
         LinkSet extends any ?
@@ -64,7 +69,7 @@ type ValuesFor_Impl<
         0: ValuesFor_Invariant<LinkSet, Key>,
         1: ValuesFor_Covariant<LinkSet, Key>,
         2: ValuesFor_Contravariant<LinkSet, Key>,
-        3: ValuesFor_Bivariant<LinkSet, Key>
+        3: ValuesFor_Bivariant_strictFuncTypes<LinkSet, Key>
     } [Variant];
 type ToUnion<Set> = 
     Set extends LinkBase ?
@@ -72,10 +77,20 @@ type ToUnion<Set> =
         : Set extends [...infer U] ? 
             U[number] 
             : Set;
+type IsSet<T> = T extends [...any] ? true : false;
+type IsUnion_Helper<T1, T2> = 
+    T1 extends any ? 
+        [T2] extends [T1] ? 
+            false
+            : true 
+        : false;
+type IsUnion<T> = IsUnion_Helper<T, T>;
 type Flatten_Helper<Set> =
     Set extends LinkBase  ?
         Set
-        : Flatten<Set>;
+        : true extends IsSet<Set> | IsUnion<Set> ?
+            Flatten<Set>
+            : Set;
 type Flatten<Set> = 
     [Set] extends [never[]] ?
         never
