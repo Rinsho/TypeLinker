@@ -1,6 +1,6 @@
 //Type map generators
 export type M2N<TypeSet1, TypeSet2> = 
-    M2N_Helper<ToUnion<TypeSet1>, ToUnion<TypeSet2>>;
+    M2N_Helper<Flatten<TypeSet1>, Flatten<TypeSet2>>;
 export type O2N<TypeSet1, TypeSet2> = Link<TypeSet1, Flatten<TypeSet2>>;
 
 //Core
