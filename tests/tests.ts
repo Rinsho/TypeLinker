@@ -3,7 +3,10 @@ import type { Link, KeysOf, ValuesFor, Variance, O2N, M2N } from '../core/TypeLi
 //
 // TESTS
 //
-class A { A:string; } class B extends A { B:string } class C extends B { C:string } class D { D:string }
+class A { A:string; } 
+class B extends A { B:string; } 
+class C extends B { C:string; } 
+class D { D:string; }
 type TypeMaps = {
     tuple: [ Link<A, C>, Link<B, A>, Link<C, D>, Link<D, null>],
     union: Link<A, C> | Link<B, A> | Link<C, D> | Link<D, null>,

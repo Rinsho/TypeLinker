@@ -46,19 +46,11 @@ type ValuesFor_Invariant<LinkSet, Key extends KeysOf<LinkSet>> =
             : never
         : never;
 
-//Slower but works for contravariant function configs
+//Less fancy than using the default bivariant nature of function arguments,
+//but also works if 'strictFunctionTypes' is enabled, so there's that.
 type ValuesFor_Bivariant_strictFuncTypes<LinkSet, Key extends KeysOf<LinkSet>> =
     ValuesFor_Covariant<LinkSet, Key> | ValuesFor_Contravariant<LinkSet, Key>;
-
-type ValuesFor_Bivariant<LinkSet, Key extends KeysOf<LinkSet>> =
-    Key extends any ?
-        LinkSet extends any ?
-            ((a:LinkSet)=>void) extends ((a:Link<Key, infer Value>)=>void) ?
-                Value 
-                : never
-            : never
-        : never;
-
+    
 //Helpers
 type LinkBase = { _isMapperLink_42761: true };
 type ValuesFor_Impl<

@@ -1,9 +1,10 @@
 {
     "compilerOptions": {
+        "strict": true,
         "keyofStringsOnly": true,
-        "strictFunctionTypes": true,
         "noImplicitAny": true,
-        "strictNullChecks": true,
+        //makes our tests annoying so disable it
+        "strictPropertyInitialization": false,
         "allowJs": true,
         "target": "es2015",
         "noErrorTruncation":true 
