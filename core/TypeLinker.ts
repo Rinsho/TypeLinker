@@ -45,7 +45,7 @@ type CovariantHead<Links, Head extends HeadsOf<Links>> =
 type ContravariantHead<Links, Head extends HeadsOf<Links>> =
     Head extends any ?
         Links extends any ?
-            Link<Head, any> extends Links ?
+            Link<Head, never> extends Links ?
                 Links extends Link<any, infer Tail> ?
                     Tail 
                     : never
@@ -56,7 +56,7 @@ type ContravariantHead<Links, Head extends HeadsOf<Links>> =
 type InvariantHead<Links, Head extends HeadsOf<Links>> =
     Head extends any ?
         Links extends any ?
-            Link<Head, any> extends Links ?
+            Link<Head, never> extends Links ?
                 Links extends Link<Head, infer Tail> ?
                     Tail
                     : never
@@ -66,8 +66,16 @@ type InvariantHead<Links, Head extends HeadsOf<Links>> =
 
 //Less fancy than using the default bivariant nature of function arguments,
 //but also works if 'strictFunctionTypes' is enabled, so there's that.
+//
+//ToUnion<[,]> isn't strictly necessary here since you can just union both
+//results together directly, but for whatever reason doing this tuple to union
+//conversion forces the typescript compiler/linter to fully resolve the aliases.
+//Without it sometimes you'd see the type listed as, for example,
+//    BivariantHead<Link<A,B> | Link<B,C>, B>
+//instead of the fully resolved B | C. It still worked for verifying types and
+//showing errors; it was just annoying if you wanted to see what types were available.
 type BivariantHead<Links, Head extends HeadsOf<Links>> =
-    CovariantHead<Links, Head> | ContravariantHead<Links, Head>;
+    ToUnion<[CovariantHead<Links, Head>, ContravariantHead<Links, Head>]>;
     
 //Helpers
 type LinkBase = { _isGraphLink_2723ae78_ad67_11eb_8529_0242ac130003: true };
@@ -104,7 +112,5 @@ type Flatten_Helper<Set> =
 
 type M2N_Helper<Set1, Set2> =
     Set1 extends any ?
-        Set2 extends any ?
-            Link<Set1, Set2>
-            : never
+        Link_O2N<Set1, Set2>
         : never;
