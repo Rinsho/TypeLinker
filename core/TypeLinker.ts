@@ -1,46 +1,64 @@
-//Type map generators
-export type M2N<TypeSet1, TypeSet2> = 
-    M2N_Helper<Flatten<TypeSet1>, Flatten<TypeSet2>>;
-export type O2N<TypeSet1, TypeSet2> = Link<TypeSet1, Flatten<TypeSet2>>;
 
 //Core
-export type Link<Key, Value> = [Key, Value] & LinkBase;
-export enum Variance { None = 0, Co = 1, Contra = 2, Bi = 3 }
-export type ValuesFor<
+export type Link<Head, Tail> = [Head, Tail] & LinkBase;
+
+export const enum Variance { None = 0, Co = 1, Contra = 2, Bi = 3 }
+
+export type HeadsOf<Links> = 
+    Flatten<Links> extends Link<infer Head, any> ? Head : never;
+
+export type TailsFrom<
     Links,
-    Key extends KeysOf<Links>,
-    Variant extends Variance = Variance.None> =
+    Head extends HeadsOf<Links>,
+    HeadVariance extends Variance = Variance.None> =
         Flatten<Links> extends infer L ? 
-            [Key] extends [KeysOf<L>] ?
-                ValuesFor_Impl<L, Key, Variant>
+            [Head] extends [HeadsOf<L>] ?
+                VarianceHandler<L, Head, HeadVariance>
                 : never
             : never;
-export type KeysOf<Links> = 
-    Flatten<Links> extends Link<infer Key, any> ? Key : never;
+
+export type Link_O2N<Head, Tails> = 
+    Link<Head, Flatten<Tails>>;
+
+export type Link_M2N<Heads, Tails> = 
+    M2N_Helper<Flatten<Heads>, Flatten<Tails>>;
 
 //Variance handlers
-type ValuesFor_Covariant<LinkSet, Key extends KeysOf<LinkSet>> =
-    Key extends any ?
-        LinkSet extends Link<Key, infer Value> ? 
-            Value 
+type VarianceHandler<
+    Links, 
+    Head extends HeadsOf<Links>, 
+    HeadVariance extends Variance> =
+    {
+        0: InvariantHead<Links, Head>,
+        1: CovariantHead<Links, Head>,
+        2: ContravariantHead<Links, Head>,
+        3: BivariantHead<Links, Head>
+    } [HeadVariance];
+
+type CovariantHead<Links, Head extends HeadsOf<Links>> =
+    Head extends any ?
+        Links extends Link<Head, infer Tail> ? 
+            Tail 
             : never
         : never;
-type ValuesFor_Contravariant<LinkSet, Key extends KeysOf<LinkSet>> =
-    Key extends any ?
-        LinkSet extends any ?
-            Link<Key, any> extends LinkSet ?
-                LinkSet extends Link<any, infer Value> ?
-                    Value 
+
+type ContravariantHead<Links, Head extends HeadsOf<Links>> =
+    Head extends any ?
+        Links extends any ?
+            Link<Head, any> extends Links ?
+                Links extends Link<any, infer Tail> ?
+                    Tail 
                     : never
                 : never
             : never
         : never;
-type ValuesFor_Invariant<LinkSet, Key extends KeysOf<LinkSet>> =
-    Key extends any ?
-        LinkSet extends any ?
-            Link<Key, any> extends LinkSet ?
-                LinkSet extends Link<Key, infer Value> ?
-                    Value
+
+type InvariantHead<Links, Head extends HeadsOf<Links>> =
+    Head extends any ?
+        Links extends any ?
+            Link<Head, any> extends Links ?
+                Links extends Link<Head, infer Tail> ?
+                    Tail
                     : never
                 : never
             : never
@@ -48,45 +66,42 @@ type ValuesFor_Invariant<LinkSet, Key extends KeysOf<LinkSet>> =
 
 //Less fancy than using the default bivariant nature of function arguments,
 //but also works if 'strictFunctionTypes' is enabled, so there's that.
-type ValuesFor_Bivariant_strictFuncTypes<LinkSet, Key extends KeysOf<LinkSet>> =
-    ValuesFor_Covariant<LinkSet, Key> | ValuesFor_Contravariant<LinkSet, Key>;
+type BivariantHead<Links, Head extends HeadsOf<Links>> =
+    CovariantHead<Links, Head> | ContravariantHead<Links, Head>;
     
 //Helpers
-type LinkBase = { _isMapperLink_42761: true };
-type ValuesFor_Impl<
-    LinkSet, 
-    Key extends KeysOf<LinkSet>, 
-    Variant extends Variance> =
-    {
-        0: ValuesFor_Invariant<LinkSet, Key>,
-        1: ValuesFor_Covariant<LinkSet, Key>,
-        2: ValuesFor_Contravariant<LinkSet, Key>,
-        3: ValuesFor_Bivariant_strictFuncTypes<LinkSet, Key>
-    } [Variant];
+type LinkBase = { _isGraphLink_42761e4: true };
+
+type IsSet<T> = T extends [...any] ? true : false;
+
 type ToUnion<Set> = 
     Set extends LinkBase ?
         Set
         : Set extends [...infer U] ? 
             U[number] 
             : Set;
-type IsSet<T> = T extends [...any] ? true : false;
+
+type IsUnion<T> = IsUnion_Helper<T, T>;
+
 type IsUnion_Helper<T1, T2> = 
     T1 extends any ? 
         [T2] extends [T1] ? 
             false
             : true 
         : false;
-type IsUnion<T> = IsUnion_Helper<T, T>;
+
+type Flatten<Set> = 
+    [Set] extends [never[]] ?
+        never
+        : Flatten_Helper<ToUnion<Set>>;
+
 type Flatten_Helper<Set> =
     Set extends LinkBase  ?
         Set
         : true extends IsSet<Set> | IsUnion<Set> ?
             Flatten<Set>
             : Set;
-type Flatten<Set> = 
-    [Set] extends [never[]] ?
-        never
-        : Flatten_Helper<ToUnion<Set>>;
+
 type M2N_Helper<Set1, Set2> =
     Set1 extends any ?
         Set2 extends any ?

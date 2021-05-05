@@ -1,5 +1,5 @@
 
-import type { Link, KeysOf, ValuesFor, Variance, O2N, M2N } from '../core/TypeLinker';
+import type { Link, HeadsOf, TailsFrom, Variance, Link_O2N, Link_M2N } from '../core/TypeLinker';
 //
 // TESTS
 //
@@ -16,38 +16,38 @@ type TypeMaps = {
 type ActiveMap = TypeMaps['nested'];
 
 //Class example
-class example<K extends KeysOf<ActiveMap>, V extends ValuesFor<ActiveMap, K, Variance.Co>> {}
+class example<K extends HeadsOf<ActiveMap>, V extends TailsFrom<ActiveMap, K, Variance.Co>> {}
 var test: example<A,C>;
 
 //Covariant
-var a: ValuesFor<ActiveMap, A, Variance.Co>; //A | C | D
-var b: ValuesFor<ActiveMap, B, Variance.Co>; //A | D
-var h: ValuesFor<ActiveMap, C, Variance.Co>; //D
-var j: ValuesFor<ActiveMap, D, Variance.Co>; //null
+var a: TailsFrom<ActiveMap, A, Variance.Co> extends A | C | D ? true : false; //A | C | D
+var b: TailsFrom<ActiveMap, B, Variance.Co>; //A | D
+var h: TailsFrom<ActiveMap, C, Variance.Co>; //D
+var j: TailsFrom<ActiveMap, D, Variance.Co>; //null
 
 //Contravariant
-var c: ValuesFor<ActiveMap, A, Variance.Contra>; //C
-var d: ValuesFor<ActiveMap, B, Variance.Contra>; //A | C
-var i: ValuesFor<ActiveMap, C, Variance.Contra>; //A | C | D
-var k: ValuesFor<ActiveMap, D, Variance.Contra>; //null
+var c: TailsFrom<ActiveMap, A, Variance.Contra>; //C
+var d: TailsFrom<ActiveMap, B, Variance.Contra>; //A | C
+var i: TailsFrom<ActiveMap, C, Variance.Contra>; //A | C | D
+var k: TailsFrom<ActiveMap, D, Variance.Contra>; //null
 
 //Invariant
-var e: ValuesFor<ActiveMap, A>; //C
-var f: ValuesFor<ActiveMap, B>; //A
-var g: ValuesFor<ActiveMap, C, Variance.None>; //D
-var l: ValuesFor<ActiveMap, D, Variance.None>; //null
+var e: TailsFrom<ActiveMap, A>; //C
+var f: TailsFrom<ActiveMap, B>; //A
+var g: TailsFrom<ActiveMap, C, Variance.None>; //D
+var l: TailsFrom<ActiveMap, D, Variance.None>; //null
 
 //Bivariant
-var m: ValuesFor<ActiveMap, A, Variance.Bi>; //A | C | D
-var n: ValuesFor<ActiveMap, B, Variance.Bi>; //A | C | D
-var o: ValuesFor<ActiveMap, C, Variance.Bi>; //A | C | D
-var p: ValuesFor<ActiveMap, D, Variance.Bi>; //null
+var m: TailsFrom<ActiveMap, A, Variance.Bi>; //A | C | D
+var n: TailsFrom<ActiveMap, B, Variance.Bi>; //A | C | D
+var o: TailsFrom<ActiveMap, C, Variance.Bi>; //A | C | D
+var p: TailsFrom<ActiveMap, D, Variance.Bi>; //null
 
 //Multi-key
-var q: ValuesFor<ActiveMap, A|D>; //C | null
-var r: ValuesFor<ActiveMap, A|D, Variance.Co>; //A | C | D | null
+var q: TailsFrom<ActiveMap, A|D>; //C | null
+var r: TailsFrom<ActiveMap, A|D, Variance.Co>; //A | C | D | null
 
 //Link Distributivity
-var s: ValuesFor<Link<A,C> | Link<A,null>, A>; //C | null
-var t: ValuesFor<O2N<A, C|null>, A>; //C | null
-var u: ValuesFor<M2N<A|D, D|null> | Link<B,A>, A, Variance.Co>; //A | D | null
+var s: TailsFrom<Link<A,C> | Link<A,null>, A>; //C | null
+var t: TailsFrom<Link_O2N<A, C|null>, A>; //C | null
+var u: TailsFrom<Link_M2N<A|D, D|null> | Link<B,A>, A, Variance.Co>; //A | D | null
