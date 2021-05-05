@@ -20,7 +20,7 @@ class example<K extends HeadsOf<ActiveMap>, V extends TailsFrom<ActiveMap, K, Va
 var test: example<A,C>;
 
 //Covariant
-var a: TailsFrom<ActiveMap, A, Variance.Co> extends A | C | D ? true : false; //A | C | D
+var a: TailsFrom<ActiveMap, A, Variance.Co>; //A | C | D
 var b: TailsFrom<ActiveMap, B, Variance.Co>; //A | D
 var h: TailsFrom<ActiveMap, C, Variance.Co>; //D
 var j: TailsFrom<ActiveMap, D, Variance.Co>; //null
