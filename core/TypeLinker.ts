@@ -70,7 +70,7 @@ type BivariantHead<Links, Head extends HeadsOf<Links>> =
     CovariantHead<Links, Head> | ContravariantHead<Links, Head>;
     
 //Helpers
-type LinkBase = { _isGraphLink_42761e4: true };
+type LinkBase = { _isGraphLink_2723ae78_ad67_11eb_8529_0242ac130003: true };
 
 type IsSet<T> = T extends [...any] ? true : false;
 
