@@ -4,14 +4,20 @@ export type Link<Head, Tail> = [Head, Tail] & LinkBase;
 
 export const enum Variance { None = 0, Co = 1, Contra = 2, Bi = 3 }
 
-export type HeadsOf<Links> = 
-    Flatten<Links> extends Link<infer Head, any> ? Head : never;
+export type HeadsOf<Graph> = 
+    Flatten<Graph> extends infer G ? //Flatten first to catch Graph = []
+        G extends never ? //Explicit check for valid graph, otherwise some types such
+            never         //as never will return unknown as a head inference below.
+            : G extends Link<infer Head, any> ? 
+                Head 
+                : never
+        : never;
 
-export type TailsFrom<
-    Links,
-    Head extends HeadsOf<Links>,
+export type TailsOf<
+    Graph,
+    Head extends HeadsOf<Graph>,
     HeadVariance extends Variance = Variance.None> =
-        Flatten<Links> extends infer L ? 
+        Flatten<Graph> extends infer L ? 
             [Head] extends [HeadsOf<L>] ?
                 VarianceHandler<L, Head, HeadVariance>
                 : never
@@ -64,23 +70,15 @@ type InvariantHead<Links, Head extends HeadsOf<Links>> =
             : never
         : never;
 
-//Less fancy than using the default bivariant nature of function arguments,
-//but also works if 'strictFunctionTypes' is enabled, so there's that.
-//
-//ToUnion<[,]> isn't strictly necessary here since you can just union both
-//results together directly, but for whatever reason doing this tuple to union
-//conversion forces the typescript compiler/linter to fully resolve the aliases.
-//Without it sometimes you'd see the type listed as, for example,
-//    BivariantHead<Link<A,B> | Link<B,C>, B>
-//instead of the fully resolved B | C. It still worked for verifying types and
-//showing errors; it was just annoying if you wanted to see what types were available.
+//Packing and unpacking the tuple is to prevent deferred type resolution.
+//We can optimize over ToUnion<> since we know this is a non-Link tuple.
 type BivariantHead<Links, Head extends HeadsOf<Links>> =
-    ToUnion<[CovariantHead<Links, Head>, ContravariantHead<Links, Head>]>;
+    [CovariantHead<Links, Head>, ContravariantHead<Links, Head>][number];
     
 //Helpers
 type LinkBase = { _isGraphLink_2723ae78_ad67_11eb_8529_0242ac130003: true };
 
-type IsSet<T> = T extends [...any] ? true : false;
+type IsTuple<T> = T extends [...any] ? true : false;
 
 type ToUnion<Set> = 
     Set extends LinkBase ?
@@ -89,11 +87,11 @@ type ToUnion<Set> =
             U[number] 
             : Set;
 
-type IsUnion<T> = IsUnion_Helper<T, T>;
+type IsUnion<Set> = IsUnion_Helper<Set, Set>;
 
-type IsUnion_Helper<T1, T2> = 
-    T1 extends any ? 
-        [T2] extends [T1] ? 
+type IsUnion_Helper<Set, SetCopy> = 
+    Set extends any ? 
+        [SetCopy] extends [Set] ? 
             false
             : true 
         : false;
@@ -106,7 +104,7 @@ type Flatten<Set> =
 type Flatten_Helper<Set> =
     Set extends LinkBase  ?
         Set
-        : true extends IsSet<Set> | IsUnion<Set> ?
+        : true extends IsTuple<Set> | IsUnion<Set> ?
             Flatten<Set>
             : Set;
 
