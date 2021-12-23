@@ -10,5 +10,5 @@
         "noErrorTruncation":true,
         "outDir": "build"
     },
-    "include": ["core/TypeLinker.ts", "tests/tests.ts", "tests/stuff.ts"]
+    "include": ["core/TypeDictionary.ts", "tests/tests.ts"]
 }
